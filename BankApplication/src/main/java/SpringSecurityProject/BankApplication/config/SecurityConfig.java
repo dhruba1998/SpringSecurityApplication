@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -31,9 +32,10 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 //        http.authorizeHttpRequests((request) -> request.anyRequest().authenticated());
+        http.csrf(csrf -> csrf.disable());          // This is used to perform create,update,delete operation on db as it's disabled by default
         http.authorizeHttpRequests((request) -> {
             request.requestMatchers("/myAccount","/myBalance","/myCards","/myLoans").authenticated()
-                    .requestMatchers("/notice","/contacts").permitAll();
+                    .requestMatchers("/notice","/contacts","/register").permitAll();
         });
         http.formLogin(Customizer.withDefaults());
         http.httpBasic(Customizer.withDefaults());
@@ -50,10 +52,24 @@ public class SecurityConfig {
 //        return new InMemoryUserDetailsManager(dhruba,souvik);
 //    }
 
+    /*
+    The following bean is used to leverage the Users, Authorities tables provided by Spring Security Team
+    DataSource is the mysql connection which is used as backend db, as we pass this parameter to the
+    jdbcUserDetailsManager, it knows what is the db url and name to connect.
+    If you want to use your own custom table then you need to create your own custom UserDetailsService/Manager
+    and to communicate with your db you need to use spring-data-jpa(Repo layer).
+     */
+
+//    @Bean
+//    public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource){
+//        return new JdbcUserDetailsManager(dataSource);
+//    }
+
 
     @Bean
-    public JdbcUserDetailsManager jdbcUserDetailsManager(DataSource dataSource){
-        return new JdbcUserDetailsManager(dataSource);
+    public PasswordEncoder passwordEncoder(){
+//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
