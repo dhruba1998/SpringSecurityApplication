@@ -68,8 +68,8 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder(){
-//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        return new BCryptPasswordEncoder();
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();      //This will use default PasswordEncoder provided by Spring Security team
+//        return new BCryptPasswordEncoder();
     }
 
     @Bean
